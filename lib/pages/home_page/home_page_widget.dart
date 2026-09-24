@@ -235,7 +235,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Text(
-                    'Sample FlutterFlow App 5.0.5',
+                    'Sample FlutterFlow App 6.0.0',
                     textAlign: TextAlign.center,
                     style: FlutterFlowTheme.of(context).textTheme.headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
@@ -256,6 +256,18 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           : Text(title),
                     ),
                     const SizedBox(height: 12),
+                    GoMarketMe().showReferralCodeTrigger(
+                      onResult: (data) {
+                        if (mounted && data != null) {
+                          setState(() => _affiliateData = data);
+                        }
+                      },
+                      onError: (error) {
+                        if (mounted) {
+                          setState(() => _errorMessage = error.toString());
+                        }
+                      },
+                    ),
                     TextButton(
                       onPressed: _redeemOfferCode,
                       child: Text('Redeem Offer Code: $_offerCode'),
@@ -304,6 +316,11 @@ class _AffiliateDataCard extends StatelessWidget {
             Text('Affiliate ID: ${data.affiliate.id}'),
             Text('Affiliate %: ${data.saleDistribution.affiliatePercentage}'),
             Text('Campaign ID: ${data.campaign.id}'),
+            Text(
+              data.referralCode == null
+                  ? 'Attribution source: affiliate link'
+                  : 'Referral Code: ${data.referralCode}',
+            ),
           ],
         ),
       ),

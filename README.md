@@ -1,6 +1,6 @@
 # GoMarketMe FlutterFlow Sample App
 
-This sample demonstrates how to use the GoMarketMe Flutter SDK `5.0.5` in a FlutterFlow-style Flutter app.
+This sample demonstrates how to use the GoMarketMe Flutter SDK `6.0.0` in a FlutterFlow-style Flutter app.
 
 ## Supported platforms
 
@@ -28,10 +28,10 @@ const String kAppleAppId = '1234';
 
 Replace those values with your real GoMarketMe API key, StoreKit/Google Play product IDs, and Apple app ID.
 
-The app depends on the published SDK:
+The app depends on the published v6 SDK:
 
 ```yaml
-gomarketme: 5.0.5
+gomarketme: ^6.0.0
 ```
 
 ## Run
@@ -66,3 +66,10 @@ If your iOS app sells consumable in-app purchases, keep this key in `ios/Runner/
 <key>SKIncludeConsumableInAppPurchaseHistory</key>
 <true/>
 ```
+
+The sample uses `GoMarketMe().showReferralCodeTrigger()`, so its link or button
+appearance comes from the GoMarketMe settings endpoint and affiliate data is
+refreshed after success.
+Attributed installs cannot apply another code. The sample displays the optional
+referral code when attribution came from redemption, or identifies link
+attribution when cached system-info data does not include `referral_code`.

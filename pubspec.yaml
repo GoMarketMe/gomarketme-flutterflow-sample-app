@@ -1,7 +1,7 @@
 name: gomarketme_flutterflow_sample_app
-description: A FlutterFlow-friendly sample app for the GoMarketMe Flutter SDK 5.0.5.
+description: A FlutterFlow-friendly sample app for the GoMarketMe Flutter SDK 6.0.0.
 publish_to: 'none'
-version: 5.0.5+2
+version: 6.0.0+2
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  gomarketme: 5.0.5
+  gomarketme: ^6.0.0
   in_app_purchase: ^3.2.3
   url_launcher: ^6.3.1
 
