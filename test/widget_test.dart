@@ -2,8 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gomarketme_flutterflow_sample_app/main.dart';
 
 void main() {
-  testWidgets('renders the GoMarketMe sample app title', (tester) async {
+  testWidgets('renders the GoMarketMe integration guide', (tester) async {
     await tester.pumpWidget(const GoMarketMeSampleApp());
-    expect(find.text('Sample FlutterFlow App 6.0.0'), findsOneWidget);
+    expect(find.text('GoMarketMe Flutter SDK'), findsOneWidget);
+    expect(find.text('Initialize'), findsOneWidget);
+    expect(find.text('Referral codes'), findsOneWidget);
   });
 }
