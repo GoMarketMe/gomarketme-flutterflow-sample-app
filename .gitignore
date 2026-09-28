@@ -22,3 +22,8 @@ ios/Flutter/ephemeral/
 ios/Pods/
 ios/Runner.xcworkspace/
 ios/.symlinks/
+
+# Others
+.DS_Store
+**/xcuserdata/
+ios/Flutter/flutter_export_environment.sh

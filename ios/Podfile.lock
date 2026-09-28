@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - gomarketme (6.0.0):
+  - gomarketme (6.0.1):
     - Flutter
   - in_app_purchase_storekit (0.0.1):
     - Flutter
@@ -26,7 +26,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  gomarketme: 7e040d55168c36917dbe40f3e9b85e0252eaa629
+  gomarketme: 0b8b9bee986bfdab153a229cf228ff73cdd2f71d
   in_app_purchase_storekit: 22cca7d08eebca9babdf4d07d0baccb73325d3c8
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 

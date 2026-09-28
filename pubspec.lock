@@ -76,10 +76,10 @@ packages:
     dependency: "direct main"
     description:
       name: gomarketme
-      sha256: "91da029e60a64e25cfade69511a40dec9ceb104a5ba68458cc8f27219fff5c1c"
+      sha256: "1f6a61efa170506a8ced56ac2b4f61408bae2cf4e674c6f1eb45bfc25e50db80"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "6.0.1"
   in_app_purchase:
     dependency: "direct main"
     description:

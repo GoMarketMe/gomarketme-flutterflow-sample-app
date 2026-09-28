@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class HomePageWidget extends StatefulWidget {
 
 class _HomePageWidgetState extends State<HomePageWidget> {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  final TextEditingController _referralCodeController = TextEditingController();
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   List<ProductDetails> _products = <ProductDetails>[];
@@ -32,6 +34,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   bool _isPurchased = false;
   bool _isSyncing = false;
   bool _iapAvailable = false;
+  bool _isRedeemingReferralCode = false;
 
   _SampleMessage? _initializationMessage;
   _SampleMessage? _referralMessage;
@@ -61,6 +64,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   @override
   void dispose() {
     _purchaseSubscription?.cancel();
+    _referralCodeController.dispose();
     super.dispose();
   }
 
@@ -269,6 +273,38 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     }
   }
 
+  Future<void> _redeemReferralCode() async {
+    final code = _nonEmpty(_referralCodeController.text);
+    if (code == null || _isRedeemingReferralCode) return;
+    setState(() => _isRedeemingReferralCode = true);
+    try {
+      final data = await GoMarketMe().redeemReferralCode(code);
+      if (mounted) {
+        setState(() {
+          _affiliateData = data;
+          _referralCodeController.clear();
+          _referralMessage = _SampleMessage.success(
+            'Referral code ${_nonEmpty(data.referralCode) ?? code} applied.',
+          );
+        });
+      }
+    } on GoMarketMeReferralCodeException catch (error) {
+      if (mounted) {
+        setState(() {
+          _referralMessage = _SampleMessage.error(_referralErrorMessage(error));
+        });
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _referralMessage = _SampleMessage.error(error.toString());
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isRedeemingReferralCode = false);
+    }
+  }
+
   void _setPurchaseMessage(_SampleMessage message) {
     if (!mounted) {
       return;
@@ -403,6 +439,36 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 });
               }
             },
+          ),
+          const Divider(height: 32),
+          Text(
+            'Custom referral-code UI',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _referralCodeController,
+            autocorrect: false,
+            textCapitalization: TextCapitalization.characters,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Referral code',
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed:
+                GoMarketMe().isInitialized &&
+                    !_isRedeemingReferralCode &&
+                    _nonEmpty(_referralCodeController.text) != null
+                ? _redeemReferralCode
+                : null,
+            child: Text(
+              _isRedeemingReferralCode ? 'Applying…' : 'Apply referral code',
+            ),
           ),
           if (_referralMessage != null) ...<Widget>[
             const SizedBox(height: 12),
@@ -546,10 +612,12 @@ class _SampleHeader extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Icon(
-              Icons.link_rounded,
-              color: Theme.of(context).colorScheme.primary,
-              size: 32,
+            Image.asset(
+              'assets/gomarketme-logo.png',
+              width: 40,
+              height: 40,
+              semanticLabel: 'GoMarketMe logo',
+              filterQuality: FilterQuality.high,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -565,7 +633,7 @@ class _SampleHeader extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Sample integration · SDK 6.0.0',
+          'Sample integration · SDK 6.0.1',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -669,6 +737,8 @@ class _AffiliateData extends StatelessWidget {
         ),
         _KeyValueRow(label: 'Affiliate ID', value: data.affiliate.id),
         _KeyValueRow(label: 'Campaign ID', value: data.campaign.id),
+        if (data.deviceId.trim().isNotEmpty)
+          _KeyValueRow(label: 'Device ID', value: data.deviceId.trim()),
         _KeyValueRow(
           label: 'Affiliate share',
           value: data.saleDistribution.affiliatePercentage.isEmpty
@@ -676,6 +746,18 @@ class _AffiliateData extends StatelessWidget {
               : '${data.saleDistribution.affiliatePercentage}%',
         ),
         _KeyValueRow(label: 'Referral code', value: referralCode ?? '—'),
+        _KeyValueRow(
+          label: 'Campaign metadata',
+          value: jsonEncode(data.campaign.metadata),
+        ),
+        _KeyValueRow(
+          label: 'Affiliate metadata',
+          value: jsonEncode(data.affiliate.metadata),
+        ),
+        _KeyValueRow(
+          label: 'Affiliate campaign metadata',
+          value: jsonEncode(data.affiliateCampaign.metadata),
+        ),
         if (showAppleOfferCode)
           _KeyValueRow(label: 'Apple offer code', value: offerCode ?? '—'),
         const SizedBox(height: 8),
@@ -779,6 +861,26 @@ class _MessageView extends StatelessWidget {
 String? _nonEmpty(String? value) {
   final trimmed = value?.trim();
   return trimmed == null || trimmed.isEmpty ? null : trimmed;
+}
+
+String _referralErrorMessage(GoMarketMeReferralCodeException error) {
+  return switch (error.code) {
+    GoMarketMeReferralCodeErrorCode.invalidCode =>
+      'That referral code is not valid. Check it and try again.',
+    GoMarketMeReferralCodeErrorCode.expiredCode =>
+      'That referral code has expired.',
+    GoMarketMeReferralCodeErrorCode.inactiveCode =>
+      'That referral code is no longer active.',
+    GoMarketMeReferralCodeErrorCode.networkError ||
+    GoMarketMeReferralCodeErrorCode.timeout =>
+      'Could not connect. Check your connection and try again.',
+    GoMarketMeReferralCodeErrorCode.notInitialized =>
+      'Referral codes are not ready yet. Please try again.',
+    _ =>
+      error.isRetryable
+          ? 'Could not apply the referral code. Please try again.'
+          : error.message,
+  };
 }
 
 extension<T> on List<T> {
